@@ -66,12 +66,12 @@ https://ptb.discord.com/
 ## 3. Запустите `Discord PTB`
 
 <p align="left">
-  <img src="./media/icon.png" alt="Discord PTB" width="200">
+  <img src="./media/icon.png" alt="Discord PTB" width="100">
 </p>
 
-## 4. Перейдите в раздел путишествия потом `Задания` (Quests)
+## 4. Перейдите в раздел `путишествия` потом во вкладку `Задания` (Quests)
 
-## 5. Запускаем задание 
+## 5. Запускаем задание
 
 <p align="left">
   <img src="./media/7-Automatic-Discord-tasks.png" alt="Automatic-Discord-tasks" width="400">
@@ -96,7 +96,7 @@ Warning: Don’t paste code into the DevTools Console that you don’t understan
 ```
 
 <p align="left">
-  <img src="./media/1-Console-Warning.png" alt="Console-Warning" width="300">
+  <img src="./media/1-Console-Warning.png" alt="Console-Warning" width="500">
 </p>
 
 - вводим текст
@@ -105,7 +105,7 @@ Warning: Don’t paste code into the DevTools Console that you don’t understan
 allow pasting
 ```
 <p align="left">
-  <img src="./media/2-Console-Warning.png" alt="Console-Warning" width="300">
+  <img src="./media/2-Console-Warning.png" alt="Console-Warning" width="500">
 </p>
 
 - после чего вводим наш скрипт и нажимаем `Enter`
