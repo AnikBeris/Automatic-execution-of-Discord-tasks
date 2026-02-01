@@ -6,10 +6,11 @@
 #
 # Как это работает — кратко:
 # 1) compile-readme: собирает README.md из файлов в .github/README_PARTS.
-# 2) translate (matrix): переводит собранный README в несколько языков, сохраняет в LanguageReadme/.
+# 2) create-pr-readme: создаёт PR с собранным README.md.
+# 3) translate (matrix): переводит собранный README в несколько языков, сохраняет в LanguageReadme/.
 #    Каждый перевод загружается как артефакт.
-# 3) generate-language-file: скачивает переводы и формирует .github/README_PARTS/0.Language.md.
-# 4) create-pull-request: скачивает все артефакты, кладёт их в workspace и создаёт PR если есть изменения.
+# 4) generate-language-file: скачивает переводы и формирует .github/README_PARTS/0.Language.md.
+# 5) create-pull-request: скачивает артефакты переводов и индекса, кладёт их в workspace и создаёт PR если есть изменения.
 #
 # Важные примечания:
 # - В workflow используется GITHUB_TOKEN (через secrets.GITHUB_TOKEN) для создания PR и коммитов.
@@ -201,7 +202,7 @@ jobs:
   # Перевод: матрица языков (каждый перевод — отдельный job в матрице)
   # -------------------
   translate:
-    needs: compile-readme
+    needs: create-pr-readme
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -225,23 +226,78 @@ jobs:
           name: compiled-readme
           path: .
 
-      - name: Translate README (AI action)
-        id: translate
-        uses: FidelusAleksander/ai-translate-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          text-file: "README.md"
-          target-language: ${{ matrix.language }}
-          custom-instructions: "Технические термины используйте только на английском. Не переводите блоки кода или URL."
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install openai tiktoken
+
+      - name: Translate README with chunking (custom script)
+        id: translate
         env:
-          # Если требуется ключ для сервиса перевода — добавьте секрет в репо. Оставлено опционально.
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || '' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python - <<EOF
+          import os
+          import openai
+          import tiktoken
+
+          client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+          encoding = tiktoken.encoding_for_model("gpt-4o")
+
+          def count_tokens(text):
+              return len(encoding.encode(text))
+
+          def translate_chunk(chunk, target_lang, custom_instructions):
+              prompt = f"{custom_instructions}\n\nTranslate the following text to {target_lang.capitalize()}:\n\n{chunk}"
+              response = client.chat.completions.create(
+                  model="gpt-4o",
+                  messages=[{"role": "user", "content": prompt}],
+              )
+              return response.choices[0].message.content
+
+          with open("README.md", "r", encoding="utf-8") as f:
+              text = f.read()
+
+          paragraphs = text.split("\n\n")
+          chunks = []
+          current_chunk = []
+          current_tokens = 0
+          max_tokens = 6000  # Safe limit below 8000
+
+          custom_instructions = "Технические термины используйте только на английском. Не переводите блоки кода или URL."
+
+          for para in paragraphs:
+              para_tokens = count_tokens(para) + 2  # Account for \n\n
+              if current_tokens + para_tokens > max_tokens and current_chunk:
+                  chunk_text = "\n\n".join(current_chunk)
+                  translated = translate_chunk(chunk_text, "${{ matrix.language }}", custom_instructions)
+                  chunks.append(translated)
+                  current_chunk = []
+                  current_tokens = 0
+              current_chunk.append(para)
+              current_tokens += para_tokens
+
+          if current_chunk:
+              chunk_text = "\n\n".join(current_chunk)
+              translated = translate_chunk(chunk_text, "${{ matrix.language }}", custom_instructions)
+              chunks.append(translated)
+
+          translated_text = "\n\n".join(chunks)
+
+          # Set output
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as gh_output:
+              print("translated-text<<EOF", file=gh_output)
+              print(translated_text, file=gh_output)
+              print("EOF", file=gh_output)
+          EOF
 
       - name: Save translation to LanguageReadme/
         run: |
           mkdir -p LanguageReadme
-          echo "$TRANSLATED_TEXT" | tee LanguageReadme/${{ matrix.file }}
-        env:
-          TRANSLATED_TEXT: ${{ steps.translate.outputs.translated-text }}
+          echo "${{ steps.translate.outputs.translated-text }}" > LanguageReadme/${{ matrix.file }}
 
       - name: Fix media paths in translated file
         run: |
@@ -314,7 +370,7 @@ jobs:
   create-pull-request:
     needs: generate-language-file
     runs-on: ubuntu-latest
-    name: Create Pull Request with README + translations + language index
+    name: Create Pull Request with translations + language index
     steps:
       - uses: actions/checkout@v4
         with:
@@ -338,9 +394,6 @@ jobs:
           mkdir -p LanguageReadme .github/README_PARTS
 
           # Перемещаем/копируем файлы независимо от того, где они лежали в артефактах
-          # — README.md
-          find downloaded-artifacts -name "README.md" -exec cp -f {} ./README.md \; 2>/dev/null || true
-
           # — Переводы (README.*.md)
           find downloaded-artifacts -name "README.*.md" -exec cp -f {} LanguageReadme/ \; 2>/dev/null || true
 
@@ -362,7 +415,6 @@ jobs:
       - name: Verify required files exist
         run: |
           echo "Проверяем наличие ключевых файлов:"
-          [[ -f README.md ]]                  && echo "README.md" || echo "README.md НЕ НАЙДЕН!"
           [[ -f .github/README_PARTS/0.Language.md ]] && echo ".github/README_PARTS/0.Language.md" || echo "0.Language.md НЕ НАЙДЕН!"
           ls -1 LanguageReadme/README.*.md 2>/dev/null | sed 's/^/  → /' || echo "  Нет переводов в LanguageReadme/"
 
@@ -372,10 +424,9 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: regenerate README and update translations (авто)"
-          title: "chore: regenerate README and update translations (авто)"
+          commit-message: "chore: update translations (авто)"
+          title: "chore: update translations (авто)"
           body: |
-            Автоматически пересобран README.md из частей
             Обновлены переводы (EN, ES, ZH)
             Обновлён индекс языков в `.github/README_PARTS/0.Language.md`
 
@@ -389,7 +440,6 @@ jobs:
             documentation
             translation
           add-paths: |
-            README.md
             LanguageReadme/README*.md
             .github/README_PARTS/0.Language.md
 
