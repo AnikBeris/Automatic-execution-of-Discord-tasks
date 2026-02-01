@@ -166,15 +166,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          
       - name: Download compiled README artifact
         uses: actions/download-artifact@v4
         with:
           name: compiled-readme
           path: .
+
       - name: Verify README exists
         run: |
           echo "Проверяем наличие README.md:"
-          [[ -f README.md ]] && echo "README.md найден" || echo "README.md НЕ НАЙДЕН!" && exit 1
+          if [[ -f README.md ]]; then
+            echo "README.md найден"
+          else
+            echo "README.md НЕ НАЙДЕН!"
+            exit 1
+          fi
+
       - name: Create Pull Request for README
         id: create_pr_readme
         uses: peter-evans/create-pull-request@v6
@@ -184,6 +192,7 @@ jobs:
           title: "chore: regenerate README (авто)"
           body: |
             Автоматически пересобран README.md из частей
+
             Запущено workflow: ${{ github.workflow }}
             Run ID: ${{ github.run_id }}
           branch: ${{ env.BRANCH_PREFIX }}readme-${{ github.run_id }}
