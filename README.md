@@ -1,9 +1,9 @@
 <p align="center">
   <strong>-------></strong>
   <a href="/README.md">Русский</a> |
-  <a href="/docs/README.en.md">English</a> |
-  <a href="/docs/README.es.md">Spanish</a> |
-  <a href="/docs/README.zh.md">Chinese</a> |
+  <a href="/LanguageReadme/README.en.md">English</a> |
+  <a href="/LanguageReadme/README.es.md">Spanish</a> |
+  <a href="/LanguageReadme/README.zh.md">Chinese</a> |
   <strong><-------</strong>
 </p>
 
@@ -1055,9 +1055,9 @@ if(!quest) {
 <p align="center">
   <strong>-------></strong>
   <a href="/README.md">Русский</a> |
-  <a href="/docs/README.en.md">English</a> |
-  <a href="/docs/README.es.md">Spanish</a> |
-  <a href="/docs/README.zh.md">Chinese</a> |
+  <a href="/LanguageReadme/README.en.md">English</a> |
+  <a href="/LanguageReadme/README.es.md">Spanish</a> |
+  <a href="/LanguageReadme/README.zh.md">Chinese</a> |
   <strong><-------</strong>
 </p>
 
