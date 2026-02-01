@@ -1,9 +1,9 @@
 <p align="center">
   <strong>-------></strong>
   <a href="/README.md">Русский</a> |
-  <a href="/docs/README.en.md">English</a> |
-  <a href="/docs/README.es.md">Spanish</a> |
-  <a href="/docs/README.zh.md">Chinese</a> |
+  <a href="/LanguageReadme/README.en.md">English</a> |
+  <a href="/LanguageReadme/README.es.md">Spanish</a> |
+  <a href="/LanguageReadme/README.zh.md">Chinese</a> |
   <strong><-------</strong>
 </p>
 
@@ -164,7 +164,7 @@ https://ptb.discord.com/
 
 
 <div align="center">
-  <img style="width: 100%; height: auto;" alt="Discord PTB" src="./media/icon.png"/>
+  <img style="width: 20%; height: auto;" alt="Discord PTB" src="./media/icon.png"/>
 </div>
 
 
@@ -173,7 +173,7 @@ https://ptb.discord.com/
 ## 5. Запускаем задание
 
 <div align="center">
-  <img style="width: 400%; height: auto;" alt="Automatic-Discord-tasks" src="./media/7-Automatic-Discord-tasks.png">
+  <img style="width: 50%; height: auto;" alt="Automatic-Discord-tasks" src="./media/7-Automatic-Discord-tasks.png">
 </div>
 
 ## 6. Нажимаем `Ctrl+Shift+I` чтобы открыть консоль разработчика
@@ -1055,9 +1055,9 @@ if(!quest) {
 <p align="center">
   <strong>-------></strong>
   <a href="/README.md">Русский</a> |
-  <a href="/docs/README.en.md">English</a> |
-  <a href="/docs/README.es.md">Spanish</a> |
-  <a href="/docs/README.zh.md">Chinese</a> |
+  <a href="/LanguageReadme/README.en.md">English</a> |
+  <a href="/LanguageReadme/README.es.md">Spanish</a> |
+  <a href="/LanguageReadme/README.zh.md">Chinese</a> |
   <strong><-------</strong>
 </p>
 
