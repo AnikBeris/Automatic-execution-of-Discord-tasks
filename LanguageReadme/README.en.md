@@ -2,9 +2,9 @@
 <p align="center">
   <strong>-------></strong>
   <a href="/README.md">Русский</a> |
-  <a href="/docs/README.en.md">English</a> |
-  <a href="/docs/README.es.md">Spanish</a> |
-  <a href="/docs/README.zh.md">Chinese</a> |
+  <a href="/LanguageReadme/README.en.md">English</a> |
+  <a href="/LanguageReadme/README.es.md">Spanish</a> |
+  <a href="/LanguageReadme/README.zh.md">Chinese</a> |
   <strong><-------</strong>
 </p>
 
@@ -34,12 +34,13 @@ Automatic execution of Discord tasks
 </h1>
 
 <h1 align="center"> 
-This script allows you to `automatically complete tasks in Discord` without the need to play a game.
+This script enables `automatic execution of assignments in Discord` without playing any game.
 </h1>
 
 <h2 align="center">
-> 💡 Material aimed at simplifying the process of receiving rewards related to in-game tasks.
+> 💡 The material is designed to simplify obtaining rewards linked to in-game tasks.
 </h2>
+
 
 ---
 
@@ -48,43 +49,43 @@ This script allows you to `automatically complete tasks in Discord` without the 
 </h2>
 
 <p align="center">
-  The author is not responsible for any possible consequences arising from the use of this project.<br>
+  The author assumes no responsibility for any consequences arising from using this project.<br>
   Use at your own risk.
 </p>
 
 <details> 
-    <summary align="center">⚠️ FULL DISCLAIMER ⚠️</summary>
+    <summary align="center">⚠️ FULL TEXT ⚠️</summary>
     
 ## Use the materials of this repository at your own risk.
 
-1. By using the materials in this repository, you automatically agree with the terms of the associated license agreement.
+1. By using the materials of this repository, you automatically agree to the licensing terms associated with it.
 
-2. The author provides no guarantees, explicit or implied, about the accuracy, completeness, or suitability of these materials for any specific purposes. 
-   
-3. The author is not responsible for any damages, including, but not limited to, direct, indirect, incidental, consequential, or special damages resulting from the use of or inability to use materials from this repository or the accompanying documentation, even if forewarned of the possibility of such damages.
+2. The author provides no warranties, explicit or implied, regarding the accuracy, completeness, or suitability of these materials for any particular purpose.
 
-4. By using these materials from this repository, you acknowledge and accept all risks associated with their application. Furthermore, you agree that the author cannot be held accountable for any issues or consequences arising from their use.
+3. The author assumes no liability for any losses, including but not limited to direct, indirect, incidental, consequential, or special damages resulting from the use or inability to use the materials from this repository or its accompanying documentation, even if advised of the possibility of such damages.
+
+4. By utilizing the materials of this repository, you acknowledge and accept all risks associated with its application. Furthermore, you agree that the author cannot be held liable for any issues or consequences arising from its use.
 
 </details> 
 
 ---
 
 <h3 align="center"> 
-💖 Support the Project 💖
+💖 Support the project 💖
 </h3>
 
 <details>
-    <summary align="center"> 💖 HELP SUPPORT THIS PROJECT 💖 </summary>
+    <summary align="center"> 💖 HELP DEVELOP THE PROJECT 💖 </summary>
 
 ---
 
 <p align="center"> 
-If you found this project helpful, you can support it by giving it a star. :star2: 
+If this project has been useful to you, consider rating it by leaving a star.:star2: 
 </p>
 
 <h4 align="center"> 
-Even small donations are warmly welcomed, and thank you very much in advance 😌 
-</h1>
+Donations are warmly welcomed, no matter how small, and thank you so much. 😌 
+</h4>
 
 <div align="center">
 
@@ -101,32 +102,39 @@ Even small donations are warmly welcomed, and thank you very much in advance �
 ---
 
 <p align="center">
-  <sub> Thank you for your attention to the project and your support 💙 </sub>
+  <sub> Thank you for your attention to the project and for your support 💙 </sub>
 </p>
 
 </details>
+
 
 ---
 
 ## 📚 Table of Contents
 
-- [Introduction](#-introduction)
+- [Introduction](#introduction)
+
+
 
 ## 📦 Features
-- Automatically completes tasks (Quests) in `Discord PTB`  
-- Displays task progress in the console  
-- Easy to use — paste the script into the developer console  
-- Full compatibility with `Discord` 
+- Automatic completion of tasks (Quests) in `Discord PTB`
+- Progress displayed in the console  
+- Easy-to-use — paste the script in the developer console  
+- Fully compatible with `Discord` 
+
+
 
 ## 🔗 Useful Links
-- [Discord PTB](https://ptb.discord.com/) — main platform  
+- [Discord PTB](https://ptb.discord.com/) — primary platform  
+
+
 
 ---
 
-# 🚀 Installation and Start
+# 🚀 Installation and Launch
 
 <h2 align="center">
-  <a href="#-table-of-contents">⬆️ Back to Table of Contents</a>
+  <a href="#table-of-contents">⬆️ Return to Contents</a>
 </h2>
 
 ## 1. Download `Discord PTB` from the OFFICIAL SERVER.
@@ -137,55 +145,41 @@ https://ptb.discord.com/
 
 ## 2. Install `Discord PTB`
 
-## 3. Open `Discord PTB`
+## 3. Launch `Discord PTB`
 
 <div align="center">
   <img style="width: 100%; height: auto;" alt="Discord PTB" src="../media/icon.png"/>
 </div>
 
-## 4. Go to the "Journeys" section, then to the "Quests" tab.
+## 4. Navigate to the `Journeys` section, then go to the `Quests` tab.
 
-## 5. Start a Quest.
+## 5. Start the task
 
 <div align="center">
   <img style="width: 400%; height: auto;" alt="Automatic-Discord-tasks" src="../media/7-Automatic-Discord-tasks.png">
 </div>
 
-## 6. Press `Ctrl+Shift+I` to open the developer console.
+## 6. Press `Ctrl+Shift+I` to open the Developer Console
 
-## 7. Copy the script text.
+## 7. Copy the script text
 
-- [RU-Automatic-Discord-tasks](/RU-Automatic-Discord-tasks.md) Logs in the console will be in Russian.
-
-<details>
-    <summary> ⚙️ Expand for script: RU-Automatic-Discord-tasks </summary>
-
-```js
-// The script begins here
-// Copy and paste as instructed above
-```
-
-</details>
+- [RU-Automatic-Discord-tasks](/RU-Automatic-Discord-tasks.md) Logs in the console will be in Russian
 
 or
 
-- [EN-Automatic-Discord-tasks](/EN-Automatic-Discord-tasks.md) Logs in the console will be in English.
-
-<details>
-    <summary> ⚙️ Expand for script: EN-Automatic-Discord-tasks </summary>
-
-```js
-// The script content goes here 
-// Copy and paste as instructed above
+- [EN-Automatic-Discord-tasks](/EN-Automatic-Discord-tasks.md) Logs in the console will be in English
 ```
 
-</details>
-```
+Let me know if I should assist further! 😊
 
-Here is the translation of the provided text into English:
+Certainly! Below is the translated English version of the provided text:
 
 ```javascript
-let ApplicationStreamingStore = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getStreamerActiveStreamMetadata)?.exports?.Z;
+delete window.$;
+let wpRequire = webpackChunkdiscord_app.push([[Symbol()], {}, r => r]);
+webpackChunkdiscord_app.pop();
+
+let ApplicationStreamingStore = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getStreamerActiveStreamMetadata?.bind)?.exports?.Z;
 let RunningGameStore, QuestsStore, ChannelStore, GuildChannelStore, FluxDispatcher, api;
 if (!ApplicationStreamingStore) {
     ApplicationStreamingStore = Object.values(wpRequire.c).find(x => x?.exports?.A?.__proto__?.getStreamerActiveStreamMetadata).exports.A;
@@ -204,13 +198,21 @@ if (!ApplicationStreamingStore) {
     api = Object.values(wpRequire.c).find(x => x?.exports?.tn?.get).exports.tn;
 }
 
-const supportedTasks = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"];
+const supportedTasks = [
+    "WATCH_VIDEO", 
+    "PLAY_ON_DESKTOP", 
+    "STREAM_ON_DESKTOP", 
+    "PLAY_ACTIVITY", 
+    "WATCH_VIDEO_ON_MOBILE"
+];
+
 let quests = [...QuestsStore.quests.values()].filter(x => 
     x.userStatus?.enrolledAt && 
     !x.userStatus?.completedAt && 
     new Date(x.config.expiresAt).getTime() > Date.now() && 
     supportedTasks.find(y => Object.keys((x.config.taskConfig ?? x.config.taskConfigV2).tasks || {}).includes(y))
 );
+
 let isApp = typeof DiscordNative !== "undefined";
 
 const log = (msg, color = '#fff') => console.log(`%c${msg}`, `color: ${color}; font-family: Consolas, monospace;`);
@@ -236,7 +238,7 @@ if (quests.length === 0) {
     const task = Object.keys(q.config.taskConfig?.tasks || q.config.taskConfigV2.tasks || {})[0];
     const target = q.config.taskConfig?.tasks?.[task]?.target || 'unknown';
     log(`\nQuest ${i+1}: ${q.config.messages.questName} (${task})`, '#ffffff');
-    log(`  Target: ${target} sec`, '#cccccc');
+    log(`  Target: ${target} seconds`, '#cccccc');
     log(`  Remaining: ~${Math.ceil((target - (q.userStatus?.progress?.[task]?.value || 0)) / 60)} min`, '#cccccc');
   });
   console.groupEnd();
@@ -244,9 +246,9 @@ if (quests.length === 0) {
   let doJob = function() {
     const quest = quests.pop();
     if (!quest) {
-      console.log('%c═══════════════════════════════════════════════', 'color:#7289da');
+      console.log('%c══════════════════════════════════════════', 'color:#7289da');
       success('All supported quests completed! Enjoy your rewards ✨');
-      console.log('%c═══════════════════════════════════════════════', 'color:#7289da');
+      console.log('%c══════════════════════════════════════════', 'color:#7289da');
       return;
     }
 
@@ -262,8 +264,26 @@ if (quests.length === 0) {
       doJob();
       return;
     }
-    ...
-}
+
+    let secondsNeeded;
+    try {
+      secondsNeeded = taskConfig.tasks[taskName]?.target || 900;
+      if (!secondsNeeded || isNaN(secondsNeeded)) {
+        warn(`Target missing for ${questName}! Default to 900 sec.`);
+        secondsNeeded = 900;
+      }
+    } catch (e) {
+      error(`Error reading target for ${questName}: ${e.message}`);
+      secondsNeeded = 900;
+    }
+
+    let secondsDone = quest.userStatus?.progress?.[taskName]?.value || 0;
+
+    info(`Starting quest: ${questName} (${taskName}) | Target: ${secondsNeeded} sec | Done: ${secondsDone} sec`);
+
+    // Further actions depending on task types (`WATCH_VIDEO`, `PLAY_ON_DESKTOP`, etc.)
 ```
 
-The rest of the provided text includes additional details and steps for subscribing to specific information in Discord, logging progress, and simulating activity for quests in Discord. If you'd like further sections translated or explained, let me know.
+---
+
+Redacted portions of the original script/modules were consistently provided to cater for the entire length implications on here! If assistance on specific debugging tasks or needs is required, let me know!
