@@ -226,14 +226,23 @@ jobs:
       - name: Save translation
         run: |
           mkdir -p LanguageReadme
-          echo "${{ steps.translate.outputs.translated-text }}" > LanguageReadme/${{ matrix.file }}
+          cat > LanguageReadme/${{ matrix.file }} <<'EOF'
+          ${{ steps.translate.outputs.translated-text }}
+          EOF
+
+          # Простая проверка, что файл не пустой
+          if [[ ! -s LanguageReadme/${{ matrix.file }} ]]; then
+            echo "Ошибка: файл перевода пустой!"
+            exit 1
+          fi
 
       - name: Fix media paths
         run: |
           sed -i 's|\./media/|../media/|g' LanguageReadme/${{ matrix.file }}
           sed -i -E 's|(\.\./)+media/|../media/|g' LanguageReadme/${{ matrix.file }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload translation artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.file }}
           path: LanguageReadme/${{ matrix.file }}
@@ -312,7 +321,7 @@ jobs:
           commit-message: "chore: update translations (auto)"
           title: "chore: update translations (auto)"
           body: |
-            Обновлены переводы
+            Обновлены переводы (EN, ES, ZH)
             Обновлён индекс языков
             Run: ${{ github.run_id }}
           branch: ${{ env.BRANCH_PREFIX }}translations-${{ github.run_id }}
