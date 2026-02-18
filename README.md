@@ -573,257 +573,379 @@ if (quests.length === 0) {
     <summary> ⚙️ Разверните внутри скрипт: EN-Automatic-Discord-tasks </summary>
 
 ```js
+// ────────────────────────────────────────────────
+// 1. Подготовка webpack-модулей Discord (обход встроенного $)
+// ────────────────────────────────────────────────
 delete window.$;
+
 let wpRequire = webpackChunkdiscord_app.push([[Symbol()], {}, r => r]);
 webpackChunkdiscord_app.pop();
 
-let ApplicationStreamingStore = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getStreamerActiveStreamMetadata)?.exports?.Z;
+// ────────────────────────────────────────────────
+// 2. Поиск нужных хранилищ и API (разные версии Discord)
+// ────────────────────────────────────────────────
+let ApplicationStreamingStore = Object.values(wpRequire.c).find(
+    x => x?.exports?.Z?.__proto__?.getStreamerActiveStreamMetadata
+)?.exports?.Z;
+
 let RunningGameStore, QuestsStore, ChannelStore, GuildChannelStore, FluxDispatcher, api;
+
 if (!ApplicationStreamingStore) {
-    ApplicationStreamingStore = Object.values(wpRequire.c).find(x => x?.exports?.A?.__proto__?.getStreamerActiveStreamMetadata).exports.A;
-    RunningGameStore = Object.values(wpRequire.c).find(x => x?.exports?.Ay?.getRunningGames).exports.Ay;
-    QuestsStore = Object.values(wpRequire.c).find(x => x?.exports?.A?.__proto__?.getQuest).exports.A;
-    ChannelStore = Object.values(wpRequire.c).find(x => x?.exports?.A?.__proto__?.getAllThreadsForParent).exports.A;
-    GuildChannelStore = Object.values(wpRequire.c).find(x => x?.exports?.Ay?.getSFWDefaultChannel).exports.Ay;
-    FluxDispatcher = Object.values(wpRequire.c).find(x => x?.exports?.h?.__proto__?.flushWaitQueue).exports.h;
-    api = Object.values(wpRequire.c).find(x => x?.exports?.Bo?.get).exports.Bo;
+    // старая структура модулей
+    ApplicationStreamingStore = Object.values(wpRequire.c).find(
+        x => x?.exports?.A?.__proto__?.getStreamerActiveStreamMetadata
+    )?.exports?.A;
+
+    RunningGameStore    = Object.values(wpRequire.c).find(x => x?.exports?.Ay?.getRunningGames)?.exports?.Ay;
+    QuestsStore         = Object.values(wpRequire.c).find(x => x?.exports?.A?.__proto__?.getQuest)?.exports?.A;
+    ChannelStore        = Object.values(wpRequire.c).find(x => x?.exports?.A?.__proto__?.getAllThreadsForParent)?.exports?.A;
+    GuildChannelStore   = Object.values(wpRequire.c).find(x => x?.exports?.Ay?.getSFWDefaultChannel)?.exports?.Ay;
+    FluxDispatcher      = Object.values(wpRequire.c).find(x => x?.exports?.h?.__proto__?.flushWaitQueue)?.exports?.h;
+    api                 = Object.values(wpRequire.c).find(x => x?.exports?.Bo?.get)?.exports?.Bo;
 } else {
-    RunningGameStore = Object.values(wpRequire.c).find(x => x?.exports?.ZP?.getRunningGames).exports.ZP;
-    QuestsStore = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getQuest).exports.Z;
-    ChannelStore = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getAllThreadsForParent).exports.Z;
-    GuildChannelStore = Object.values(wpRequire.c).find(x => x?.exports?.ZP?.getSFWDefaultChannel).exports.ZP;
-    FluxDispatcher = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.flushWaitQueue).exports.Z;
-    api = Object.values(wpRequire.c).find(x => x?.exports?.tn?.get).exports.tn;
+    // новая структура модулей
+    RunningGameStore    = Object.values(wpRequire.c).find(x => x?.exports?.ZP?.getRunningGames)?.exports?.ZP;
+    QuestsStore         = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getQuest)?.exports?.Z;
+    ChannelStore        = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.getAllThreadsForParent)?.exports?.Z;
+    GuildChannelStore   = Object.values(wpRequire.c).find(x => x?.exports?.ZP?.getSFWDefaultChannel)?.exports?.ZP;
+    FluxDispatcher      = Object.values(wpRequire.c).find(x => x?.exports?.Z?.__proto__?.flushWaitQueue)?.exports?.Z;
+    api                 = Object.values(wpRequire.c).find(x => x?.exports?.tn?.get)?.exports?.tn;
 }
 
-const supportedTasks = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"];
-let quests = [...QuestsStore.quests.values()].filter(x => 
-    x.userStatus?.enrolledAt && 
-    !x.userStatus?.completedAt && 
-    new Date(x.config.expiresAt).getTime() > Date.now() && 
-    supportedTasks.find(y => Object.keys((x.config.taskConfig ?? x.config.taskConfigV2).tasks || {}).includes(y))
-);
-let isApp = typeof DiscordNative !== "undefined";
+// ────────────────────────────────────────────────
+// 3. поддерживаемые типы заданий
+// ────────────────────────────────────────────────
+const supportedTasks = [
+    "WATCH_VIDEO",
+    "PLAY_ON_DESKTOP",
+    "STREAM_ON_DESKTOP",
+    "PLAY_ACTIVITY",
+    "WATCH_VIDEO_ON_MOBILE"
+];
 
-const log = (msg, color = '#fff') => console.log(`%c${msg}`, `color: ${color}; font-family: Consolas, monospace;`);
-const success = (msg) => log(`[SUCCESS] ${msg}`, '#00ff9d');
-const info = (msg) => log(`[INFO]    ${msg}`, '#4da6ff');
-const warn = (msg) => log(`[WARN]    ${msg}`, '#ffcc00');
-const error = (msg) => log(`[ERROR]   ${msg}`, '#ff4d4d');
+const isDesktopApp = typeof DiscordNative !== "undefined";
 
+// ────────────────────────────────────────────────
+// 4. функции логирования
+// ────────────────────────────────────────────────
+const log = (msg, color = '#fff') => 
+    console.log(`%c${msg}`, `color: ${color}; font-family: Consolas, monospace;`);
+
+const success = msg => log(`[SUCCESS] ${msg}`, '#00ff9d');
+const info    = msg => log(`[INFO]    ${msg}`, '#4da6ff');
+const warn    = msg => log(`[WARN]    ${msg}`, '#ffcc00');
+const error   = msg => log(`[ERROR]   ${msg}`, '#ff4d4d');
+
+// ────────────────────────────────────────────────
+// 5. Функция отрисовки прогрессбара
+// ────────────────────────────────────────────────
 function progressBar(progress, total, width = 20) {
-  const percent = Math.min(100, Math.floor((progress / total) * 100));
-  const filled = Math.floor((width * progress) / total);
-  const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
-  const timeLeft = Math.ceil((total - progress) / 60);
-  return `[${bar}] ${progress}/${total} (${percent}%) • ${timeLeft} min left`;
+    const percent = Math.min(100, Math.floor((progress / total) * 100));
+    const filled = Math.floor((width * progress) / total);
+    const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
+    const timeLeft = Math.ceil((total - progress) / 60);
+    return `[${bar}] ${progress}/${total} (${percent}%) • ${timeLeft} min left`;
 }
 
+// ────────────────────────────────────────────────
+// 6. Получение актуальных квестов
+// ────────────────────────────────────────────────
+let quests = [...QuestsStore.quests.values()].filter(quest =>
+    quest.userStatus?.enrolledAt &&
+    !quest.userStatus?.completedAt &&
+    new Date(quest.config.expiresAt).getTime() > Date.now() &&
+    supportedTasks.some(task => 
+        Object.keys(quest.config.taskConfig?.tasks || quest.config.taskConfigV2?.tasks || {}).includes(task)
+    )
+);
+
+// ────────────────────────────────────────────────
+// 7. Вывод информации о найденных квестах
+// ────────────────────────────────────────────────
 if (quests.length === 0) {
-  info("No active supported quests found. Check Discover → Quests.");
+    info("Активных поддерживаемых заданий не найдено. Проверьте раздел «Поиск заданий» → «Задания».");
 } else {
-  console.groupCollapsed('%c🎮 Discord Quest Booster v2.1 – Active Tasks 🚀', 'color:#7289da; font-weight:bold; font-size:14px;');
-  log(`Found ${quests.length} quest(s)`, '#7289da');
-  quests.forEach((q, i) => {
-    const task = Object.keys(q.config.taskConfig?.tasks || q.config.taskConfigV2.tasks || {})[0];
-    const target = q.config.taskConfig?.tasks?.[task]?.target || 'unknown';
-    log(`\nQuest ${i+1}: ${q.config.messages.questName} (${task})`, '#ffffff');
-    log(`  Target: ${target} sec`, '#cccccc');
-    log(`  Remaining: ~${Math.ceil((target - (q.userStatus?.progress?.[task]?.value || 0)) / 60)} min`, '#cccccc');
-  });
-  console.groupEnd();
-
-  let doJob = function() {
-    const quest = quests.pop();
-    if (!quest) {
-      console.log('%c═══════════════════════════════════════════════', 'color:#7289da');
-      success('All supported quests completed! Enjoy your rewards ✨');
-      console.log('%c═══════════════════════════════════════════════', 'color:#7289da');
-      return;
-    }
-
-    const pid = Math.floor(Math.random() * 30000) + 1000;
-    const applicationId = quest.config.application.id;
-    const applicationName = quest.config.application.name;
-    const questName = quest.config.messages.questName;
-    const taskConfig = quest.config.taskConfig ?? quest.config.taskConfigV2;
-    const taskName = supportedTasks.find(x => taskConfig.tasks?.[x] != null);
+    console.groupCollapsed('%c🎮 Automatic execution of Discord tasks v2', 
+        'color:#7289da; font-weight:bold; font-size:14px;');
     
-    if (!taskName) {
-      error(`No supported task found in quest ${questName}. Skipping...`);
-      doJob();
-      return;
-    }
+    log(`Found ${quests.length} quest(s)`, '#7289da');
 
-    let secondsNeeded;
-    try {
-      secondsNeeded = taskConfig.tasks[taskName]?.target ?? 
-                      taskConfig.tasks[taskName]?.durationSeconds ?? 
-                      taskConfig.tasks[taskName]?.goal ?? 
-                      900;
-      if (!secondsNeeded || isNaN(secondsNeeded)) {
-        warn(`Target not found for ${questName}! Using fallback 900 sec.`);
-        secondsNeeded = 900;
-      }
-    } catch (e) {
-      error(`Error reading target for ${questName}: ${e.message}`);
-      secondsNeeded = 900;
-    }
+    quests.forEach((q, i) => {
+        const task = Object.keys(q.config.taskConfig?.tasks || q.config.taskConfigV2.tasks || {})[0];
+        const target = q.config.taskConfig?.tasks?.[task]?.target || 'unknown';
 
-    let secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 
-                      quest.userStatus?.progress?.[taskName]?.progress ?? 0;
+        log(`\nQuest ${i+1}: ${q.config.messages.questName} (${task})`, '#ffffff');
+        log(`  Target: ${target} sec`, '#cccccc');
+        log(`  Remaining: ~${Math.ceil((target - (q.userStatus?.progress?.[task]?.value || 0)) / 60)} min`, '#cccccc');
+    });
 
-    info(`Starting quest: ${questName} (${taskName}) | Detected target: ${secondsNeeded} sec | Done: ${secondsDone} sec`);
+    console.groupEnd();
 
-    if (taskName === "WATCH_VIDEO" || taskName === "WATCH_VIDEO_ON_MOBILE") {
-      const maxFuture = 10, speed = 7, interval = 1;
-      const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime();
-      let completed = false;
-      let fn = async () => {
-        while (true) {
-          const maxAllowed = Math.floor((Date.now() - enrolledAt)/1000) + maxFuture;
-          const diff = maxAllowed - secondsDone;
-          const timestamp = secondsDone + speed;
-          if (diff >= speed) {
-            const res = await api.post({url: `/quests/${quest.id}/video-progress`, body: {timestamp: Math.min(secondsNeeded, timestamp + Math.random())}});
-            completed = res.body.completed_at != null;
-            secondsDone = Math.min(secondsNeeded, timestamp);
-            const progText = progressBar(secondsDone, secondsNeeded);
-            log(`Video spoof: ${progText}`, '#00ff9d');
-          }
-          
-          if (timestamp >= secondsNeeded) {
-            break;
-          }
-          await new Promise(resolve => setTimeout(resolve, interval * 1000));
+    // ────────────────────────────────────────────────
+    // 8. Основная функция обработки заданий (рекурсия)
+    // ────────────────────────────────────────────────
+    let doJob = function processNextQuest() {
+        const quest = quests.pop();
+        if (!quest) {
+            console.log('%c═══════════════════════════════════════════════', 'color:#7289da');
+            success('Все поддерживаемые задания выполнены! Не забываем забирать наградами ✨');
+            console.log('%c═══════════════════════════════════════════════', 'color:#7289da');
+            return;
         }
-        if (!completed) {
-          await api.post({url: `/quests/${quest.id}/video-progress`, body: {timestamp: secondsNeeded}});
+
+        // ── Подготовка данных квеста ─────────────────────────────────────
+        const pid = Math.floor(Math.random() * 30000) + 1000;
+        const applicationId = quest.config.application.id;
+        const applicationName = quest.config.application.name;
+        const questName = quest.config.messages.questName;
+        const taskConfig = quest.config.taskConfig ?? quest.config.taskConfigV2;
+        const taskName = supportedTasks.find(x => taskConfig.tasks?.[x] != null);
+
+        if (!taskName) {
+            error(`Не найдено поддерживаемых задач. ${questName}. Пропуск...`);
+            processNextQuest();
+            return;
         }
-        success(`Quest completed: ${questName} 🎉`);
-        doJob();
-      };
-      fn();
-      info(`Spoofing video for ${questName}.`);
-    } else if (taskName === "PLAY_ON_DESKTOP") {
-      if (!isApp) {
-        warn("This no longer works in browser for non-video quests. Use the discord desktop app.");
-        doJob();
-        return;
-      }
-      api.get({url: `/applications/public?application_ids=${applicationId}`}).then(res => {
-        const appData = res.body[0];
-        const exeName = appData.executables.find(x => x.os === "win32")?.name?.replace(">","") || "game.exe";
-        
-        const fakeGame = {
-          cmdLine: `C:\\Program Files\\${appData.name}\\${exeName}`,
-          exeName,
-          exePath: `c:/program files/${appData.name.toLowerCase()}/${exeName}`,
-          hidden: false,
-          isLauncher: false,
-          id: applicationId,
-          name: appData.name,
-          pid: pid,
-          pidPath: [pid],
-          processName: appData.name,
-          start: Date.now(),
-        };
-        const realGames = RunningGameStore.getRunningGames();
-        const fakeGames = [fakeGame];
-        const realGetRunningGames = RunningGameStore.getRunningGames;
-        const realGetGameForPID = RunningGameStore.getGameForPID;
-        RunningGameStore.getRunningGames = () => fakeGames;
-        RunningGameStore.getGameForPID = (pid) => fakeGames.find(x => x.pid === pid);
-        FluxDispatcher.dispatch({type: "RUNNING_GAMES_CHANGE", removed: realGames, added: [fakeGame], games: fakeGames});
-        
-        let fn = data => {
-          let progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value || 0);
-          const progText = progressBar(progress, secondsNeeded);
-          const percent = Math.round((progress / secondsNeeded) * 100);
-          const color = percent >= 90 ? '#00ff9d' : percent >= 50 ? '#ffcc00' : '#4da6ff';
-          log(`Progress: ${progText}`, color);
-          
-          if (progress >= secondsNeeded) {
-            success(`Quest completed: ${questName} 🎉`);
-            
-            RunningGameStore.getRunningGames = realGetRunningGames;
-            RunningGameStore.getGameForPID = realGetGameForPID;
-            FluxDispatcher.dispatch({type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: []});
-            FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-            
-            doJob();
-          }
-        };
-        FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-        
-        info(`Spoofed your game to ${applicationName}. Wait for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`);
-      }).catch(e => {
-        error(`API error for ${questName}: ${e.message}`);
-        doJob();
-      });
-    } else if (taskName === "STREAM_ON_DESKTOP") {
-      if (!isApp) {
-        warn("This no longer works in browser for non-video quests. Use the discord desktop app.");
-        doJob();
-        return;
-      }
-      let realFunc = ApplicationStreamingStore.getStreamerActiveStreamMetadata;
-      ApplicationStreamingStore.getStreamerActiveStreamMetadata = () => ({
-        id: applicationId,
-        pid,
-        sourceName: null
-      });
-      
-      let fn = data => {
-        let progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value || 0);
-        const progText = progressBar(progress, secondsNeeded);
-        const percent = Math.round((progress / secondsNeeded) * 100);
-        const color = percent >= 90 ? '#00ff9d' : percent >= 50 ? '#ffcc00' : '#4da6ff';
-        log(`Progress: ${progText}`, color);
-        
-        if (progress >= secondsNeeded) {
-          success(`Quest completed: ${questName} 🎉`);
-          
-          ApplicationStreamingStore.getStreamerActiveStreamMetadata = realFunc;
-          FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-          
-          doJob();
+
+        // ── Определение необходимого времени ─────────────────────────────
+        let secondsNeeded;
+        try {
+            secondsNeeded = taskConfig.tasks[taskName]?.target 
+                         ?? taskConfig.tasks[taskName]?.durationSeconds 
+                         ?? taskConfig.tasks[taskName]?.goal 
+                         ?? 900;
+
+            if (!secondsNeeded || isNaN(secondsNeeded)) {
+                warn(`Цель не найдена для ${questName}! Using fallback 900 sec.`);
+                secondsNeeded = 900;
+            }
+        } catch (e) {
+            error(`Ошибка чтения объекта для ${questName}: ${e.message}`);
+            secondsNeeded = 900;
         }
-      };
-      FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-      
-      info(`Spoofed your stream to ${applicationName}. Stream any window in vc for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`);
-      warn("Remember that you need at least 1 other person to be in the vc!");
-    } else if (taskName === "PLAY_ACTIVITY") {
-      const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id ?? Object.values(GuildChannelStore.getAllGuilds()).find(x => x != null && x.VOCAL.length > 0)?.VOCAL[0]?.channel.id;
-      const streamKey = `call:${channelId}:1`;
-      
-      let fn = async () => {
-        info(`Completing quest ${questName}`);
-        
-        while (true) {
-          const res = await api.post({url: `/quests/${quest.id}/heartbeat`, body: {stream_key: streamKey, terminal: false}});
-          const progress = res.body.progress.PLAY_ACTIVITY.value || 0;
-          const progText = progressBar(progress, secondsNeeded);
-          const percent = Math.round((progress / secondsNeeded) * 100);
-          const color = percent >= 90 ? '#00ff9d' : percent >= 50 ? '#ffcc00' : '#4da6ff';
-          log(`Progress: ${progText}`, color);
-          
-          await new Promise(resolve => setTimeout(resolve, 20 * 1000));
-          
-          if (progress >= secondsNeeded) {
-            await api.post({url: `/quests/${quest.id}/heartbeat`, body: {stream_key: streamKey, terminal: true}});
-            break;
-          }
+
+        let secondsDone = quest.userStatus?.progress?.[taskName]?.value 
+                         ?? quest.userStatus?.progress?.[taskName]?.progress 
+                         ?? 0;
+
+        info(`Начало задания: ${questName} (${taskName}) | Цель: ${secondsNeeded} sec | Уже: ${secondsDone} sec`);
+
+        // ────────────────────────────────────────────────
+        // 9. Разные стратегии выполнения в зависимости от типа задания
+        // ────────────────────────────────────────────────
+
+        if (taskName === "WATCH_VIDEO" || taskName === "WATCH_VIDEO_ON_MOBILE") {
+            // ── Имитация просмотра видео ────────────────────────────────
+            const maxFuture = 10;
+            const speed = 7;
+            const interval = 1;
+            const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime();
+            let completed = false;
+
+            const spoofVideoProgress = async () => {
+                while (true) {
+                    const maxAllowed = Math.floor((Date.now() - enrolledAt)/1000) + maxFuture;
+                    const diff = maxAllowed - secondsDone;
+                    const timestamp = secondsDone + speed;
+
+                    if (diff >= speed) {
+                        const res = await api.post({
+                            url: `/quests/${quest.id}/video-progress`,
+                            body: { timestamp: Math.min(secondsNeeded, timestamp + Math.random()) }
+                        });
+                        completed = res.body.completed_at != null;
+                        secondsDone = Math.min(secondsNeeded, timestamp);
+
+                        log(`Video spoof: ${progressBar(secondsDone, secondsNeeded)}`, '#00ff9d');
+                    }
+
+                    if (timestamp >= secondsNeeded) break;
+                    await new Promise(r => setTimeout(r, interval * 1000));
+                }
+
+                if (!completed) {
+                    await api.post({
+                        url: `/quests/${quest.id}/video-progress`,
+                        body: { timestamp: secondsNeeded }
+                    });
+                }
+
+                success(`Квест завершен: ${questName} 🎉`);
+                processNextQuest();
+            };
+
+            spoofVideoProgress();
+            info(`Spoofing video for ${questName}.`);
         }
-        
-        success(`Quest completed: ${questName} 🎉`);
-        doJob();
-      };
-      fn();
-    }
-  };
-  doJob();
+
+        else if (taskName === "PLAY_ON_DESKTOP") {
+            // ── Подмена запущенной игры (только в десктопном клиенте) ───
+            if (!isDesktopApp) {
+                warn("В браузере для заверщения заданий это больше не работает. Используйте настольное приложение Discord.");
+                processNextQuest();
+                return;
+            }
+
+            api.get({ url: `/applications/public?application_ids=${applicationId}` })
+                .then(res => {
+                    const appData = res.body[0];
+                    const exeName = appData.executables.find(x => x.os === "win32")?.name?.replace(">","") || "game.exe";
+
+                    const fakeGame = {
+                        cmdLine:     `C:\\Program Files\\${appData.name}\\${exeName}`,
+                        exeName,
+                        exePath:     `c:/program files/${appData.name.toLowerCase()}/${exeName}`,
+                        hidden:      false,
+                        isLauncher:  false,
+                        id:          applicationId,
+                        name:        appData.name,
+                        pid,
+                        pidPath:     [pid],
+                        processName: appData.name,
+                        start:       Date.now(),
+                    };
+
+                    const realGames = RunningGameStore.getRunningGames();
+                    const fakeGames = [fakeGame];
+
+                    const originalGetRunningGames = RunningGameStore.getRunningGames;
+                    const originalGetGameForPID    = RunningGameStore.getGameForPID;
+
+                    RunningGameStore.getRunningGames = () => fakeGames;
+                    RunningGameStore.getGameForPID   = pid => fakeGames.find(x => x.pid === pid);
+
+                    FluxDispatcher.dispatch({
+                        type: "RUNNING_GAMES_CHANGE",
+                        removed: realGames,
+                        added: [fakeGame],
+                        games: fakeGames
+                    });
+
+                    const onHeartbeat = data => {
+                        let progress = quest.config.configVersion === 1
+                            ? data.userStatus.streamProgressSeconds
+                            : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value || 0);
+
+                        const progText = progressBar(progress, secondsNeeded);
+                        const percent = Math.round((progress / secondsNeeded) * 100);
+                        const color = percent >= 90 ? '#00ff9d' : percent >= 50 ? '#ffcc00' : '#4da6ff';
+
+                        log(`Прогресс: ${progText}`, color);
+
+                        if (progress >= secondsNeeded) {
+                            success(`Квест завершен: ${questName} 🎉`);
+
+                            RunningGameStore.getRunningGames = originalGetRunningGames;
+                            RunningGameStore.getGameForPID    = originalGetGameForPID;
+
+                            FluxDispatcher.dispatch({
+                                type: "RUNNING_GAMES_CHANGE",
+                                removed: [fakeGame],
+                                added: [],
+                                games: []
+                            });
+
+                            FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", onHeartbeat);
+                            processNextQuest();
+                        }
+                    };
+
+                    FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", onHeartbeat);
+
+                    info(`Ваша игра была подменена под ${applicationName}. Подождите еще ${Math.ceil((secondsNeeded - secondsDone) / 60)} минут.`);
+                })
+                .catch(e => {
+                    error(`API error for ${questName}: ${e.message}`);
+                    processNextQuest();
+                });
+        }
+
+        else if (taskName === "STREAM_ON_DESKTOP") {
+            // ── Подмена стрима (только десктоп) ───────────────────────────
+            if (!isDesktopApp) {
+                warn("В браузере это больше не работает. Используйте настольное приложение Discord.");
+                processNextQuest();
+                return;
+            }
+
+            const originalGetStreamerMetadata = ApplicationStreamingStore.getStreamerActiveStreamMetadata;
+
+            ApplicationStreamingStore.getStreamerActiveStreamMetadata = () => ({
+                id: applicationId,
+                pid,
+                sourceName: null
+            });
+
+            const onHeartbeat = data => {
+                let progress = quest.config.configVersion === 1
+                    ? data.userStatus.streamProgressSeconds
+                    : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value || 0);
+
+                const progText = progressBar(progress, secondsNeeded);
+                const percent = Math.round((progress / secondsNeeded) * 100);
+                const color = percent >= 90 ? '#00ff9d' : percent >= 50 ? '#ffcc00' : '#4da6ff';
+
+                log(`Progress: ${progText}`, color);
+
+                if (progress >= secondsNeeded) {
+                    success(`Quest completed: ${questName} 🎉`);
+                    ApplicationStreamingStore.getStreamerActiveStreamMetadata = originalGetStreamerMetadata;
+                    FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", onHeartbeat);
+                    processNextQuest();
+                }
+            };
+
+            FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", onHeartbeat);
+
+            info(`Ваш поток подменён под ${applicationName}. Транслируйте любое окно в VC ещё ${Math.ceil((secondsNeeded - secondsDone) / 60)} минут.`);
+            warn("Помните, что в голосовом канале должен быть хотя бы ещё один человек!");
+        }
+
+        else if (taskName === "PLAY_ACTIVITY") {
+            // ── Имитация активности в голосовом канале ───────────────────
+            const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id 
+                           ?? Object.values(GuildChannelStore.getAllGuilds())
+                               .find(x => x != null && x.VOCAL?.length > 0)?.VOCAL[0]?.channel.id;
+
+            const streamKey = `call:${channelId}:1`;
+
+            const completeActivityQuest = async () => {
+                info(`Completing quest ${questName}`);
+
+                while (true) {
+                    const res = await api.post({
+                        url: `/quests/${quest.id}/heartbeat`,
+                        body: { stream_key: streamKey, terminal: false }
+                    });
+
+                    const progress = res.body.progress.PLAY_ACTIVITY.value || 0;
+                    const progText = progressBar(progress, secondsNeeded);
+                    const percent = Math.round((progress / secondsNeeded) * 100);
+                    const color = percent >= 90 ? '#00ff9d' : percent >= 50 ? '#ffcc00' : '#4da6ff';
+
+                    log(`Progress: ${progText}`, color);
+
+                    await new Promise(r => setTimeout(r, 20 * 1000));
+
+                    if (progress >= secondsNeeded) {
+                        await api.post({
+                            url: `/quests/${quest.id}/heartbeat`,
+                            body: { stream_key: streamKey, terminal: true }
+                        });
+                        break;
+                    }
+                }
+
+                success(`Квест завершен: ${questName} 🎉`);
+                processNextQuest();
+            };
+
+            completeActivityQuest();
+        }
+    };
+
+    // Запуск цепочки выполнения
+    doJob();
 }
 
 ```
