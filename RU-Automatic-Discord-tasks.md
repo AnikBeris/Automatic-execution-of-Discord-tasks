@@ -149,7 +149,7 @@ if (quests.length === 0) {
             secondsNeeded = 900;
         }
 
-        const secondsDone = quest.userStatus?.progress?.[taskName]?.value 
+        let secondsDone = quest.userStatus?.progress?.[taskName]?.value 
                          ?? quest.userStatus?.progress?.[taskName]?.progress 
                          ?? 0;
 
